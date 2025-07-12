@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <sysexits.h>
 
 int main()
 {
-    char *header = "HTTP/1.1 200 OK";
+    const char *header = "HTTP/1.1 200 OK";
 
-    printf("%s\n", header);
+    fprintf(stdout, "%s\n", header);
 
-    return 0;
+    return EX_OK;
 }
