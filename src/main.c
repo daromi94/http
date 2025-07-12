@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-typedef struct request_line
+typedef struct RequestLine
 {
     char *method;
     char *request_target;
