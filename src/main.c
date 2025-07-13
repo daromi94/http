@@ -19,7 +19,34 @@ RequestLine *parse_request_line(const char *raw_request_line)
     request_line->request_target = NULL;
     request_line->http_version = NULL;
 
-    // TODO: actual parsing
+    // format: method SP request-target SP HTTP-version CRLF
+
+    // 1. extract method
+    char *method = (char *)malloc(42 * sizeof(char));
+    if (method == NULL)
+    {
+        return NULL;
+    }
+
+    request_line->method = method;
+
+    // 2. extract request-target
+    char *request_target = (char *)malloc(42 * sizeof(char));
+    if (request_target == NULL)
+    {
+        return NULL;
+    }
+
+    request_line->request_target = request_target;
+
+    // 3. extract HTTP-version
+    char *http_version = (char *)malloc(42 * sizeof(char));
+    if (request_target == NULL)
+    {
+        return NULL;
+    }
+
+    request_line->http_version = http_version;
 
     return request_line;
 }
