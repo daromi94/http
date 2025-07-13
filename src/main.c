@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,25 +31,16 @@ void destroy_request_line(RequestLine *request_line)
 
 void print_request_line(const RequestLine *request_line)
 {
+    assert(request_line != NULL);
+
     fprintf(stdout, "%s %s %s\n", request_line->method, request_line->request_target, request_line->http_version);
 }
 
-int parse_method(const char *raw_value, const int raw_length, char **output)
+int _parse_method(const char *raw_value, const int raw_length, char **output)
 {
-    // Check and initialize output
-    if (output == NULL)
-    {
-        // TODO: error message
-        return -1;
-    }
-    *output = NULL;
-
-    // Check raw value and length
-    if (raw_value == NULL || raw_length <= 0)
-    {
-        // TODO: error message
-        return -1;
-    }
+    assert(raw_value != NULL);
+    assert(raw_length > 0);
+    assert(*output == NULL);
 
     // Find first space
     int space_index = -1;
@@ -87,12 +79,34 @@ int parse_method(const char *raw_value, const int raw_length, char **output)
     return space_index;
 }
 
+int _parse_request_target(const char *raw_value, const int raw_length, int offset, char **output)
+{
+    assert(raw_value != NULL);
+    assert(raw_length > 0);
+    assert(0 < offset && offset < raw_length);
+    assert(*output == NULL);
+
+    // TODO: everything
+
+    return -1;
+}
+
 RequestLine *parse_request_line(const char *raw_value)
 {
     // Check raw value
     if (raw_value == NULL)
     {
         // TODO: error message
+        // TODO: set errno?
+        return NULL;
+    }
+
+    // Check raw length
+    const int raw_length = strlen(raw_value);
+    if (raw_length == 0)
+    {
+        // TODO: error message
+        // TODO: set errno?
         return NULL;
     }
 
@@ -101,6 +115,7 @@ RequestLine *parse_request_line(const char *raw_value)
     if (request_line == NULL)
     {
         // TODO: error message
+        // TODO: set errno?
         return NULL;
     }
 
@@ -108,16 +123,37 @@ RequestLine *parse_request_line(const char *raw_value)
     request_line->request_target = NULL;
     request_line->http_version = NULL;
 
-    // Parse and assign elements
-    const int raw_length = strlen(raw_value);
+    //  Parse method
+    int offset = _parse_method(raw_value, raw_length, &request_line->method);
+    if (offset == -1)
+    {
+        // TODO: error message
+        // TODO: set errno?
+        destroy_request_line(request_line);
+        return NULL;
+    }
 
-    if (parse_method(raw_value, raw_length, &request_line->method) == -1)
+    assert(0 < offset && offset < raw_length);
+    assert(raw_value[offset] == ' ');
+
+    if (offset + 1 >= raw_length)
+    {
+        // TODO: error message
+        // TODO: set errno?
+        return NULL;
+    }
+
+    // Ignore space
+    ++offset;
+
+    // Parse request target
+    offset = _parse_request_target(raw_value, raw_length, offset, &request_line->request_target);
+    if (offset == -1)
     {
         destroy_request_line(request_line);
         return NULL;
     }
 
-    // TODO: parse request target
     // TODO: parse http version
 
     return request_line;
